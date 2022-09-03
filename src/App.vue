@@ -6,13 +6,15 @@
   const digitoCedula = 1
   const empiezaMemoria = ref(digitoCedula *10 + 50)
   const empiezaKernel = ref(10* digitoCedula + 9)
+  const maxLength = empiezaMemoria.value - 1
+
 
   const memoriaPrincipal = computed(() => {
-    const array = []
-    for (let i = empiezaMemoria.value; i < empiezaMemoria.value + 50; i++) {
-      array.push(i)
+    let memoria = new Array(empiezaMemoria.value)
+    for (let i = 1; i < empiezaKernel.value; i++) {
+      memoria[i] = 0
     }
-    return array
+    return memoria
   })
 
 
@@ -26,7 +28,7 @@
         <p>Memoria</p>
         <input type="number" v-model = "empiezaMemoria">
         <p>Kernel</p>
-        <input type="number" v-model = "empiezaKernel">
+        <input type="number" v-model = "empiezaKernel" :maxLength = max>
       </div>
       <div class="col"></div>
       <div class="col">
@@ -34,17 +36,11 @@
           <table class="table table-bordered table-striped mb-0 table-dark table-hover">
             <thead>
               <tr>
-                <th scope="col">Posicion</th>
+                <th scope="col">Posición</th>
                 <th scope="col">Valor</th>
               </tr>
             </thead>
             <tbody>
-
-              <tr v-for="(valor, index) in memoriaPrincipalTabla" :key="index">
-                <td>{{index}}</td>
-                <td>{{valor}}</td>
-              </tr>
-
               <tr v-for="(value, index) in memoriaPrincipal" :key="index">
                 <th scope="row">{{ index }}</th>
                 <td>{{ value }}</td>
