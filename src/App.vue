@@ -7,21 +7,79 @@ import { ref, computed } from 'vue'
 const digitoCedula = 1
 const empiezaMemoria = ref(digitoCedula * 10 + 50)
 const empiezaKernel = ref(digitoCedula * 10 + 9)
-const maxLength = empiezaMemoria.value - 1
 
+const instrucciones = ref(new Array(10).fill("none"))
+const memoriaPrincipal = ref(new Array(empiezaMemoria.value));
+const variables = ref(new Array(10).fill("none"));
+const etiquetas = ref(new Array(10).fill("none"));
 
-const memoriaPrincipal = computed(() => {
+/* const memoriaPrincipal = computed(() => {
   let memoria = new Array(empiezaMemoria.value)
   for (let i = 1; i <= empiezaKernel.value; i++) {
     memoria[i] = 0
   }
   return memoria
-})
+
+}) */
 
 
+const cargar = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.onchange = (e) => {
+    const file = e.target?.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      if (text) {
+        const lines = text.toString().split("\n");
+        instrucciones.value = []
+        variables.value = []
+        lines.forEach(element => {
+          element = element.trim()
+          if (element.includes("nueva")) {
+            let a = element.split(" ")
+            console.log(a)
+            if (a[1] == "") {
+              variables.value.push(a[2])
+            }
+            else{
+              variables.value.push(a[1])
+            }
+          }
+          if(element.includes("etiqueta")){
+            let a = element.split(" ")
+            etiquetas.value.push(a[1])
+          }
+          instrucciones.value.push(element)
+        });
+        for (let i = 1; i <= empiezaKernel.value; i++) {
+          memoriaPrincipal.value[i] = "--** CH MAQUINA **--"
+        }
+        for (let i = 0; i < instrucciones.value.length; i++) {
+          memoriaPrincipal.value[i + empiezaKernel.value + 1] = instrucciones.value[i]
+        }
+
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
 </script>
 
 <template>
+  <nav class="navbar navbar-expand-lg bg-light">
+    <div class="container-fluid">
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-link" aria-current="page" href="#" @click="cargar">Home</a>
+          <a class="nav-link" href="#">Features</a>
+          <a class="nav-link" href="#">Pricing</a>
+        </div>
+      </div>
+    </div>
+  </nav>
   <h1>CH maquina</h1>
   <div class="container">
     <div class="row">
@@ -35,13 +93,11 @@ const memoriaPrincipal = computed(() => {
             <table class="table table-bordered table-striped mb-0 table-dark table-hover" id="tablaMemoria">
               <thead>
                 <tr>
-                  <th scope="col">Posición</th>
-                  <th scope="col">Valor</th>
+                  <th scope="col">Instrucciones</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(contenido, index) in memoriaPrincipal" :key="index">
-                  <th scope="row">{{ index }}</th>
+                <tr v-for="(contenido, index) in instrucciones" :key="index">
                   <td>{{ contenido }}</td>
                 </tr>
               </tbody>
@@ -51,22 +107,29 @@ const memoriaPrincipal = computed(() => {
             <table class="table table-bordered table-striped mb-0 table-dark table-hover" id="tablaMemoria">
               <thead>
                 <tr>
-                  <th scope="col">Posición</th>
-                  <th scope="col">Valor</th>
+                  <th scope="col">Variables</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(contenido, index) in memoriaPrincipal" :key="index">
-                  <th scope="row">{{ index }}</th>
+                <tr v-for="(contenido, index) in variables" :key="index">
+                  <td>{{ contenido }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="table table-bordered table-striped mb-0 table-dark table-hover my-2" id="tablaMemoria">
+              <thead>
+                <tr>
+                  <th scope="col">Variables</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(contenido, index) in etiquetas" :key="index">
                   <td>{{ contenido }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-      </div>
-      <div class="col">
-        <p>col 2</p>
       </div>
       <div class="col">
         <p>Hola</p>
