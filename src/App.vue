@@ -39,20 +39,19 @@ const cargar = () => {
         lines.forEach(element => {
           element = element.trim()
           if (element.includes("nueva")) {
-            let a = element.split(" ")
-            if (a[1] == "") {
-              variables.value.push(a[2])
+            let lineaSinEspacios = element.split(" ")
+            if (lineaSinEspacios[1] == "") {
+              variables.value.push(lineaSinEspacios[2])
             }
             else {
-              variables.value.push(a[1])
+              variables.value.push(lineaSinEspacios[1])
             }
           }
           if (element.includes("etiqueta")) {
-            let a = element.split(" ")
-            etiquetas.value.push(a[1])
+            let lineaSinEspacios = element.split(" ")
+            etiquetas.value.push(lineaSinEspacios[1])
           }
           if (element.includes("//") == false && element != "") {
-            console.log(element)
             instrucciones.value.push(element)
           }
         });
