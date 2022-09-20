@@ -38,21 +38,26 @@ const cargar = () => {
         etiquetas.value = []
         lines.forEach(element => {
           element = element.trim()
-          if (element.includes("nueva")) {
-            let lineaSinEspacios = element.split(" ")
-            if (lineaSinEspacios[1] == "") {
-              variables.value.push(lineaSinEspacios[2])
-            }
-            else {
-              variables.value.push(lineaSinEspacios[1])
-            }
-          }
-          if (element.includes("etiqueta")) {
-            let lineaSinEspacios = element.split(" ")
-            etiquetas.value.push(lineaSinEspacios[1])
-          }
-          if (element.includes("//") == false && element != "") {
+          const diccionario = ["nueva",
+            "almacene", "cargue", "lea", "sume", "reste", "multiplique", "divida",
+            "potencia", "modulo", "concatene", "elimine", "extraiga",
+            "Y", "O", "NO", "muestre", "imprima", "retorne", "vaya", "vayasi", "etiqueta"]
+          if (diccionario.includes(element.split(" ")[0])) {
             instrucciones.value.push(element)
+            if(element.split(" ")[0] == "nueva"){
+              if(element.split(" ")[1] == ""){
+                variables.value.push(element.split(" ")[2])
+              }
+              else{
+                variables.value.push(element.split(" ")[1])
+              }
+            }
+            if(element.split(" ")[0] == "variable"){
+              variables.value.push(element.split(" ")[1])
+            }
+            if(element.split(" ")[0] == "etiqueta"){
+              etiquetas.value.push(element.split(" ")[1])
+            }
           }
         });
         for (let i = 1; i <= empiezaKernel.value; i++) {
