@@ -8,11 +8,12 @@ const empiezaMemoria = ref(digitoCedula * 10 + 50)
 const empiezaKernel = ref(digitoCedula * 10 + 9)
 const programas = ref({});
 const identificadorPrograma = ref(0);
+const imprimirTexo = ref("")
 
-const instrucciones = ref(new Array(10).fill("none"))
+const instrucciones = ref([])
 const memoriaPrincipal = ref(new Array(empiezaMemoria.value));
-const variables = ref(new Array(10).fill("none"));
-const etiquetas = ref(new Array(10).fill("none"));
+const variables = ref([]);
+const etiquetas = ref([]);
 
 const acumulador = ref(0);
 const nombresValores = ref({})
@@ -23,11 +24,6 @@ const diccionario = ["nueva",
   "Y", "O", "NO", "muestre", "imprima", "retorne", "vaya", "vayasi", "etiqueta"]
 
 const cargar = () => {
-  if(instrucciones.value[0] = "none"){
-    instrucciones.value = []
-    etiquetas.value = []
-    variables.value = []
-  }
   const input = document.createElement("input");
   input.type = "file";
   input.onchange = (e) => {
@@ -144,10 +140,10 @@ const ejecutar = () => {
         break;
       case "muestre":
         if (instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador") {
-          alert(acumulador.value)
-        }
+          imprimirTexo.value += acumulador.value + "\n"
+        } 
         else {
-          alert(nombresValores.value[instrucciones.value[i].split(" ")[1]])
+          imprimirTexo.value += nombresValores.value[instrucciones.value[i].split(" ")[1]] + "\n"
         }
         break;
       case "imprima":
@@ -186,7 +182,6 @@ const ejecutar = () => {
 
 <template>
   <div class="d-flex w-100 h-100 mx-auto flex-column page">
-
     <header class="mb-auto">
       <nav class="navbar navbar-expand-md navbar-expand-lg navbar-dark bg-faded">
         <div class="container-fluid">
@@ -275,7 +270,7 @@ const ejecutar = () => {
         <div class="col">
           <div class = "row">
             <div class = "col">
-              <textarea name="" id="" cols="20" rows="10"></textarea>
+              <textarea v-model = "imprimirTexo" cols="20" rows="10"></textarea>
             </div>
             <div class = "col">
               <textarea name="" id="" cols="20" rows="10"></textarea>
