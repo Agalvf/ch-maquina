@@ -13,15 +13,13 @@ const memoriaPrincipal = ref(new Array(empiezaMemoria.value));
 const variables = ref(new Array(10).fill("none"));
 const etiquetas = ref(new Array(10).fill("none"));
 
-/* const memoriaPrincipal = computed(() => {
-  let memoria = new Array(empiezaMemoria.value)
-  for (let i = 1; i <= empiezaKernel.value; i++) {
-    memoria[i] = 0
-  }
-  return memoria
+const acumulador = ref(0);
+const nombresValores = ref({})
 
-}) */
-
+const diccionario = ["nueva",
+  "almacene", "cargue", "lea", "sume", "reste", "multiplique", "divida",
+  "potencia", "modulo", "concatene", "elimine", "extraiga",
+  "Y", "O", "NO", "muestre", "imprima", "retorne", "vaya", "vayasi", "etiqueta"]
 
 const cargar = () => {
   const input = document.createElement("input");
@@ -38,24 +36,14 @@ const cargar = () => {
         etiquetas.value = []
         lines.forEach(element => {
           element = element.trim()
-          const diccionario = ["nueva",
-            "almacene", "cargue", "lea", "sume", "reste", "multiplique", "divida",
-            "potencia", "modulo", "concatene", "elimine", "extraiga",
-            "Y", "O", "NO", "muestre", "imprima", "retorne", "vaya", "vayasi", "etiqueta"]
           if (diccionario.includes(element.split(" ")[0])) {
-            instrucciones.value.push(element)
-            if(element.split(" ")[0] == "nueva"){
-              if(element.split(" ")[1] == ""){
-                variables.value.push(element.split(" ")[2])
-              }
-              else{
-                variables.value.push(element.split(" ")[1])
-              }
+            const expreregular = /(\s{2,})/g;
+            let remplazar = element.replace(expreregular, " ");
+            instrucciones.value.push(remplazar)
+            if (remplazar.split(" ")[0] == "nueva") {
+              variables.value.push(remplazar.split(" ")[1])
             }
-            if(element.split(" ")[0] == "variable"){
-              variables.value.push(element.split(" ")[1])
-            }
-            if(element.split(" ")[0] == "etiqueta"){
+            else if (remplazar.split(" ")[0] == "etiqueta") {
               etiquetas.value.push(element.split(" ")[1])
             }
           }
@@ -73,6 +61,121 @@ const cargar = () => {
   };
   input.click();
 }
+
+const ejecutar = () => {
+  for (let i = 0; i < instrucciones.value.length; i++) {
+    switch (instrucciones.value[i].split(" ")[0].toLowerCase()) {
+      case "cargue":
+        acumulador.value = nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "almacene":
+        nombresValores.value[instrucciones.value[i].split(" ")[1]] = acumulador.value
+        break;
+      case "nueva":
+        if (instrucciones.value[i].split(" ")[2].toLowerCase() == "c") {
+          nombresValores.value[instrucciones.value[i].split(" ")[1]] = "" + instrucciones.value[i].split(" ")[3]
+        }
+        else if (instrucciones.value[i].split(" ")[2].toLowerCase() == "i") {
+          nombresValores.value[instrucciones.value[i].split(" ")[1]] = Number(instrucciones.value[i].split(" ")[3])
+        }
+        else if (instrucciones.value[i].split(" ")[2].toLowerCase() == "r") {
+          nombresValores.value[instrucciones.value[i].split(" ")[1]] = parseFloat(instrucciones.value[i].split(" ")[3])
+        }
+        else {
+          nombresValores.value[instrucciones.value[i].split(" ")[1]] = instrucciones.value[i].split(" ")[3] == 1 ? true : false
+        }
+        break;
+      case "lea":
+        nombresValores.value[instrucciones.value[i].split(" ")[1]] = prompt("Ingrese un valor")
+        break;
+      case "sume":
+        acumulador.value += nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "reste":
+        acumulador.value -= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "multiplique":
+        acumulador.value *= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "divida":
+        acumulador.value /= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "potencia":
+        acumulador.value = Math.pow(acumulador.value, nombresValores.value[instrucciones.value[i].split(" ")[1]])
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "modulo":
+        acumulador.value %= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "concatene":
+        acumulador.value += nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "elimine":
+        acumulador.value = acumulador.value.slice(0, -1)
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "extraiga":
+        acumulador.value = acumulador.value.slice(0, nombresValores.value[instrucciones.value[i].split(" ")[1]])
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "y":
+        acumulador.value = acumulador.value && nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "o":
+        acumulador.value = acumulador.value || nombresValores.value[instrucciones.value[i].split(" ")[1]]
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "no":
+        acumulador.value = !acumulador.value
+        memoriaPrincipal.value[0] = acumulador.value
+        break;
+      case "muestre":
+        if(instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador"){
+          alert(acumulador.value)
+        }
+        else{
+          alert(nombresValores.value[instrucciones.value[i].split(" ")[1]])
+        }
+      break;
+      case "imprima":
+      break;
+      case "vaya":
+        i = instrucciones.value.findIndex(instrucciones.value[i].split(" ")[1])
+        break;
+      case "vayasi":
+        if(acumulador.value > 0){
+          const a = instrucciones.value.find(
+            function(element) {
+               if(element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[1]){
+                 return element.split(" ")[2] 
+               }
+            }
+          )
+          i = parseInt(a.split(" ")[2]) -2
+        }
+        else if(acumulador.value < 0){
+          const a = instrucciones.value.find(
+            function(element) {
+               if(element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[2]){
+                 return element.split(" ")[2] 
+               }
+            }
+          )
+          i = parseInt(a.split(" ")[2]) -2
+        }
+        else
+          break;
+    }
+  }
+}
 </script>
 
 <template>
@@ -83,7 +186,7 @@ const cargar = () => {
           <div class="navbar-nav">
             <a class="nav-link" aria-current="page" href="#" @click="cargar">Home</a>
             <a class="nav-link" href="#">Features</a>
-            <a class="nav-link" href="#">Pricing</a>
+            <a class="nav-link" href="#" @click="ejecutar">Ejecutar</a>
           </div>
         </div>
       </div>
@@ -95,7 +198,7 @@ const cargar = () => {
           <p>Memoria</p>
           <input type="number" v-model="empiezaMemoria">
           <p>Kernel</p>
-          <input type="number" v-model="empiezaKernel" :maxLength=max>
+          <input type="number" v-model="empiezaKernel">
           <div class="row py-5">
             <div class="col">
               <table class="table table-bordered table-striped mb-0 table-dark table-hover" id="tablaMemoria">
