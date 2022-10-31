@@ -2,11 +2,12 @@
 
 import { ref, computed } from 'vue'
 
-
 // variables del sistema
 const digitoCedula = 1
 const empiezaMemoria = ref(digitoCedula * 10 + 50)
 const empiezaKernel = ref(digitoCedula * 10 + 9)
+const programas = ref({});
+const identificadorPrograma = ref(0);
 
 const instrucciones = ref(new Array(10).fill("none"))
 const memoriaPrincipal = ref(new Array(empiezaMemoria.value));
@@ -22,6 +23,11 @@ const diccionario = ["nueva",
   "Y", "O", "NO", "muestre", "imprima", "retorne", "vaya", "vayasi", "etiqueta"]
 
 const cargar = () => {
+  if(instrucciones.value[0] = "none"){
+    instrucciones.value = []
+    etiquetas.value = []
+    variables.value = []
+  }
   const input = document.createElement("input");
   input.type = "file";
   input.onchange = (e) => {
@@ -31,9 +37,6 @@ const cargar = () => {
       const text = e.target.result;
       if (text) {
         const lines = text.toString().split("\n");
-        instrucciones.value = []
-        variables.value = []
-        etiquetas.value = []
         lines.forEach(element => {
           element = element.trim()
           if (diccionario.includes(element.split(" ")[0])) {
@@ -54,7 +57,9 @@ const cargar = () => {
         for (let i = 0; i < instrucciones.value.length; i++) {
           memoriaPrincipal.value[i + empiezaKernel.value + 1] = instrucciones.value[i]
         }
-
+        programas.value[identificadorPrograma.value] = instrucciones.value
+        identificadorPrograma.value += 1
+        console.log(programas.value)
       }
     };
     reader.readAsText(file);
@@ -138,60 +143,85 @@ const ejecutar = () => {
         memoriaPrincipal.value[0] = acumulador.value
         break;
       case "muestre":
-        if(instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador"){
+        if (instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador") {
           alert(acumulador.value)
         }
-        else{
+        else {
           alert(nombresValores.value[instrucciones.value[i].split(" ")[1]])
         }
-      break;
+        break;
       case "imprima":
-      break;
+        break;
       case "vaya":
         i = instrucciones.value.findIndex(instrucciones.value[i].split(" ")[1])
         break;
       case "vayasi":
-        if(acumulador.value > 0){
+        if (acumulador.value > 0) {
           const a = instrucciones.value.find(
-            function(element) {
-               if(element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[1]){
-                 return element.split(" ")[2] 
-               }
+            function (element) {
+              if (element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[1]) {
+                return element.split(" ")[2]
+              }
             }
           )
-          i = parseInt(a.split(" ")[2]) -2
+          i = parseInt(a.split(" ")[2]) - 2
         }
-        else if(acumulador.value < 0){
+        else if (acumulador.value < 0) {
           const a = instrucciones.value.find(
-            function(element) {
-               if(element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[2]){
-                 return element.split(" ")[2] 
-               }
+            function (element) {
+              if (element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[2]) {
+                return element.split(" ")[2]
+              }
             }
           )
-          i = parseInt(a.split(" ")[2]) -2
+          i = parseInt(a.split(" ")[2]) - 2
         }
         else
           break;
     }
   }
 }
+
 </script>
 
 <template>
-  <div class="">
-    <nav class="navbar navbar-expand-lg bg-light">
-      <div class="container-fluid">
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-link" aria-current="page" href="#" @click="cargar">Home</a>
-            <a class="nav-link" href="#">Features</a>
-            <a class="nav-link" href="#" @click="ejecutar">Ejecutar</a>
-          </div>
+  <div class="d-flex w-100 h-100 mx-auto flex-column page">
+
+    <header class="mb-auto">
+      <nav class="navbar navbar-expand-md navbar-expand-lg navbar-dark bg-faded">
+        <div class="container-fluid">
+          <ul class="navbar-nav mx-auto">
+            <li class="nav-item text-center text-light">
+              <a class="nav-link " href="#" role="button" aria-expanded="false" @click="cargar">
+                Archivo
+              </a>
+            </li>
+
+            <li class="nav-item text-center text-light">
+              <a class="nav-link " href="#" role="button" aria-expanded="false" @click="ejecutar">
+                Ejecutar
+              </a>
+            </li>
+
+            <li class="nav-item dropdown text-center">
+              <a id="navbarScrollingDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Ventana
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+                <li>
+                  <button class="dropdown-item" type="button" @click="vista = true">
+                    Gráfica
+                  </button>
+                  <button class="dropdown-item" type="button" @click="vista = false, convertirMatriz()">Tabla</button>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
-      </div>
-    </nav>
-    <h1>CH maquina</h1>
+      </nav>
+    </header>
+
     <div class="container">
       <div class="row">
         <div class="col">
@@ -243,7 +273,14 @@ const ejecutar = () => {
           </div>
         </div>
         <div class="col">
-          <p>Hola</p>
+          <div class = "row">
+            <div class = "col">
+              <textarea name="" id="" cols="20" rows="10"></textarea>
+            </div>
+            <div class = "col">
+              <textarea name="" id="" cols="20" rows="10"></textarea>
+            </div>
+          </div>
         </div>
         <div class="col">
           <div class="table-wrapper-scroll-y my-custom-scrollbar">
