@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 // variables del sistema
 const digitoCedula = 1
@@ -14,7 +14,7 @@ const instrucciones = ref([])
 const memoriaPrincipal = ref(new Array(empiezaMemoria.value));
 const variables = ref([]);
 const etiquetas = ref([]);
-
+const posicion = ref(0);
 const acumulador = ref(0);
 const nombresValores = ref({})
 
@@ -63,118 +63,136 @@ const cargar = () => {
   input.click();
 }
 
-const ejecutar = () => {
+const ejecutar = (i) => {
+  switch (instrucciones.value[i].split(" ")[0].toLowerCase()) {
+    case "cargue":
+      acumulador.value = nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "almacene":
+      nombresValores.value[instrucciones.value[i].split(" ")[1]] = acumulador.value
+      break;
+    case "nueva":
+      if (instrucciones.value[i].split(" ")[2].toLowerCase() == "c") {
+        nombresValores.value[instrucciones.value[i].split(" ")[1]] = "" + instrucciones.value[i].split(" ")[3]
+      }
+      else if (instrucciones.value[i].split(" ")[2].toLowerCase() == "i") {
+        nombresValores.value[instrucciones.value[i].split(" ")[1]] = Number(instrucciones.value[i].split(" ")[3])
+      }
+      else if (instrucciones.value[i].split(" ")[2].toLowerCase() == "r") {
+        nombresValores.value[instrucciones.value[i].split(" ")[1]] = parseFloat(instrucciones.value[i].split(" ")[3])
+      }
+      else {
+        nombresValores.value[instrucciones.value[i].split(" ")[1]] = instrucciones.value[i].split(" ")[3] == 1 ? true : false
+      }
+      break;
+    case "lea":
+      nombresValores.value[instrucciones.value[i].split(" ")[1]] = prompt("Ingrese un valor")
+      break;
+    case "sume":
+      acumulador.value += nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "reste":
+      acumulador.value -= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "multiplique":
+      acumulador.value *= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "divida":
+      acumulador.value /= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "potencia":
+      acumulador.value = Math.pow(acumulador.value, nombresValores.value[instrucciones.value[i].split(" ")[1]])
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "modulo":
+      acumulador.value %= nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "concatene":
+      acumulador.value += nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "elimine":
+      acumulador.value = acumulador.value.slice(0, -1)
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "extraiga":
+      acumulador.value = acumulador.value.slice(0, nombresValores.value[instrucciones.value[i].split(" ")[1]])
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "y":
+      acumulador.value = acumulador.value && nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "o":
+      acumulador.value = acumulador.value || nombresValores.value[instrucciones.value[i].split(" ")[1]]
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "no":
+      acumulador.value = !acumulador.value
+      memoriaPrincipal.value[0] = acumulador.value
+      break;
+    case "muestre":
+      if (instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador") {
+        imprimirTexo.value += acumulador.value + "\n"
+      }
+      else {
+        imprimirTexo.value += nombresValores.value[instrucciones.value[i].split(" ")[1]] + "\n"
+      }
+      break;
+    case "imprima":
+      break;
+    case "vaya":
+      i = instrucciones.value.findIndex(instrucciones.value[i].split(" ")[1])
+      break;
+    case "vayasi":
+      if (acumulador.value > 0) {
+        const a = instrucciones.value.find(
+          function (element) {
+            if (element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[1]) {
+              return element.split(" ")[2]
+            }
+          }
+        )
+        return i = parseInt(a.split(" ")[2]) - 2
+      }
+      else if (acumulador.value < 0) {
+        const a = instrucciones.value.find(
+          function (element) {
+            if (element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[2]) {
+              return element.split(" ")[2]
+            }
+          }
+        )
+        return i = parseInt(a.split(" ")[2]) - 2
+      }
+      else
+        break;
+  }
+}
+
+const ejecutarTodo = () => {
   for (let i = 0; i < instrucciones.value.length; i++) {
-    switch (instrucciones.value[i].split(" ")[0].toLowerCase()) {
-      case "cargue":
-        acumulador.value = nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "almacene":
-        nombresValores.value[instrucciones.value[i].split(" ")[1]] = acumulador.value
-        break;
-      case "nueva":
-        if (instrucciones.value[i].split(" ")[2].toLowerCase() == "c") {
-          nombresValores.value[instrucciones.value[i].split(" ")[1]] = "" + instrucciones.value[i].split(" ")[3]
-        }
-        else if (instrucciones.value[i].split(" ")[2].toLowerCase() == "i") {
-          nombresValores.value[instrucciones.value[i].split(" ")[1]] = Number(instrucciones.value[i].split(" ")[3])
-        }
-        else if (instrucciones.value[i].split(" ")[2].toLowerCase() == "r") {
-          nombresValores.value[instrucciones.value[i].split(" ")[1]] = parseFloat(instrucciones.value[i].split(" ")[3])
-        }
-        else {
-          nombresValores.value[instrucciones.value[i].split(" ")[1]] = instrucciones.value[i].split(" ")[3] == 1 ? true : false
-        }
-        break;
-      case "lea":
-        nombresValores.value[instrucciones.value[i].split(" ")[1]] = prompt("Ingrese un valor")
-        break;
-      case "sume":
-        acumulador.value += nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "reste":
-        acumulador.value -= nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "multiplique":
-        acumulador.value *= nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "divida":
-        acumulador.value /= nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "potencia":
-        acumulador.value = Math.pow(acumulador.value, nombresValores.value[instrucciones.value[i].split(" ")[1]])
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "modulo":
-        acumulador.value %= nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "concatene":
-        acumulador.value += nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "elimine":
-        acumulador.value = acumulador.value.slice(0, -1)
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "extraiga":
-        acumulador.value = acumulador.value.slice(0, nombresValores.value[instrucciones.value[i].split(" ")[1]])
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "y":
-        acumulador.value = acumulador.value && nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "o":
-        acumulador.value = acumulador.value || nombresValores.value[instrucciones.value[i].split(" ")[1]]
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "no":
-        acumulador.value = !acumulador.value
-        memoriaPrincipal.value[0] = acumulador.value
-        break;
-      case "muestre":
-        if (instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador") {
-          imprimirTexo.value += acumulador.value + "\n"
-        } 
-        else {
-          imprimirTexo.value += nombresValores.value[instrucciones.value[i].split(" ")[1]] + "\n"
-        }
-        break;
-      case "imprima":
-        break;
-      case "vaya":
-        i = instrucciones.value.findIndex(instrucciones.value[i].split(" ")[1])
-        break;
-      case "vayasi":
-        if (acumulador.value > 0) {
-          const a = instrucciones.value.find(
-            function (element) {
-              if (element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[1]) {
-                return element.split(" ")[2]
-              }
-            }
-          )
-          i = parseInt(a.split(" ")[2]) - 2
-        }
-        else if (acumulador.value < 0) {
-          const a = instrucciones.value.find(
-            function (element) {
-              if (element.split(" ")[0] === "etiqueta" && element.split(" ")[1] === instrucciones.value[i].split(" ")[2]) {
-                return element.split(" ")[2]
-              }
-            }
-          )
-          i = parseInt(a.split(" ")[2]) - 2
-        }
-        else
-          break;
-    }
+    if(ejecutar(i))
+      i = ejecutar(i)
+  }
+}
+
+function pasoPaso() {
+  if(posicion.value < instrucciones.value.length){
+    console.log(posicion.value)
+
+    if(ejecutar(posicion.value))
+      posicion.value = ejecutar(posicion.value);
+    posicion.value++
+  }
+  else{
+    alert("Se ha terminado de ejecutar el programa")
   }
 }
 
@@ -193,8 +211,14 @@ const ejecutar = () => {
             </li>
 
             <li class="nav-item text-center text-light">
-              <a class="nav-link " href="#" role="button" aria-expanded="false" @click="ejecutar">
+              <a class="nav-link " href="#" role="button" aria-expanded="false" @click="ejecutarTodo">
                 Ejecutar
+              </a>
+            </li>
+
+            <li class="nav-item text-center text-light">
+              <a class="nav-link " href="#" role="button" aria-expanded="false" @click="pasoPaso">
+                Paso a paso
               </a>
             </li>
 
@@ -268,11 +292,11 @@ const ejecutar = () => {
           </div>
         </div>
         <div class="col">
-          <div class = "row">
-            <div class = "col">
-              <textarea v-model = "imprimirTexo" cols="20" rows="10"></textarea>
+          <div class="row">
+            <div class="col">
+              <textarea v-model="imprimirTexo" cols="20" rows="10"></textarea>
             </div>
-            <div class = "col">
+            <div class="col">
               <textarea name="" id="" cols="20" rows="10"></textarea>
             </div>
           </div>
