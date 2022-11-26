@@ -9,6 +9,7 @@ const empiezaKernel = ref(digitoCedula * 10 + 9)
 const programas = ref({});
 const identificadorPrograma = ref(0);
 const imprimirTexo = ref("")
+const ejecucionTexto = ref("")
 
 const instrucciones = ref([])
 const memoriaPrincipal = ref(new Array(empiezaMemoria.value));
@@ -24,6 +25,7 @@ const diccionario = ["nueva",
   "Y", "O", "NO", "muestre", "imprima", "retorne", "vaya", "vayasi", "etiqueta"]
 
 const cargar = () => {
+  instrucciones.value = []
   const input = document.createElement("input");
   input.type = "file";
   input.onchange = (e) => {
@@ -138,7 +140,7 @@ const ejecutar = (i) => {
       memoriaPrincipal.value[0] = acumulador.value
       break;
     case "muestre":
-      if (instrucciones.value[i].split(" ")[1].toLowerCase() == "acumulador") {
+      if (instrucciones.value[i].split(" ")[1] == "acumulador") {
         imprimirTexo.value += acumulador.value + "\n"
       }
       else {
@@ -176,7 +178,8 @@ const ejecutar = (i) => {
   }
 }
 
-const ejecutarTodo = () => {
+const ejecutarTodo = () => { 
+  ejecucionTexto.value = "Se está ejecutando el programa "
   for (let i = 0; i < instrucciones.value.length; i++) {
     if(ejecutar(i))
       i = ejecutar(i)
@@ -184,9 +187,9 @@ const ejecutarTodo = () => {
 }
 
 function pasoPaso() {
+  ejecucionTexto.value = "Activo el modo paso a paso" 
   if(posicion.value < instrucciones.value.length){
-    console.log(posicion.value)
-
+    ejecucionTexto.value = "Se está ejecutando la instruccion " + instrucciones.value[posicion.value]
     if(ejecutar(posicion.value))
       posicion.value = ejecutar(posicion.value);
     posicion.value++
@@ -200,7 +203,7 @@ function pasoPaso() {
 
 <template>
   <div class="d-flex w-100 h-100 mx-auto flex-column page">
-    <header class="mb-auto">
+    <header>
       <nav class="navbar navbar-expand-md navbar-expand-lg navbar-dark bg-faded">
         <div class="container-fluid">
           <ul class="navbar-nav mx-auto">
@@ -294,10 +297,10 @@ function pasoPaso() {
         <div class="col">
           <div class="row">
             <div class="col">
-              <textarea v-model="imprimirTexo" cols="20" rows="10"></textarea>
+              <textarea v-model="ejecucionTexto" cols="20" rows="10"></textarea>
             </div>
             <div class="col">
-              <textarea name="" id="" cols="20" rows="10"></textarea>
+              <textarea v-model="imprimirTexo" cols="20" rows="10"></textarea>
             </div>
           </div>
         </div>
